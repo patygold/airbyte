@@ -84,7 +84,7 @@ class PersonioStream(HttpStream, ABC):
 
 
 class Employees(PersonioStream):
-    cursor_field = "updated_since"
+    cursor_field = "last_modified_at"
     primary_key = "id"
 
     def path(self, **kwargs) -> str:
