@@ -1,0 +1,85 @@
+{
+  "type": "object",
+  "properties": {
+      "id": {
+        "type": ["null", "integer"]
+      },
+      "first_name": {
+        "type": ["null", "string"]
+      },
+      "last_name": {
+        "type": ["null", "string"]
+      },
+      "email": {
+        "type": ["null", "string"]
+      },
+      "status": {
+        "type": ["null", "string"]
+      },
+      "position": {
+        "type": ["null", "string"]
+      },
+      "supervisor": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": ["null", "integer"]
+          },
+          "first_name": {
+            "type": ["null", "string"]
+          },
+          "last_name": {
+            "type": ["null", "string"]
+          },
+          "email": {
+            "type": ["null", "string"]
+          }
+        }
+      },
+      "created_at": {
+        "type": ["null", "string"],
+        "format": "date-time"
+      },
+      "last_modified_at": {
+        "type": ["null", "string"],
+        "format": "date-time"
+      },
+      "office": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": ["null", "integer"]
+          },
+          "name": {
+            "type": ["null", "string"]
+          }
+        }
+      },
+      "department": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": ["null", "integer"]
+          },
+          "name": {
+            "type": ["null", "string"]
+          }
+        }
+      },
+      "team": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": ["null", "integer"]
+          },
+          "name": {
+            "type": ["null", "string"]
+          }
+        }
+      },
+      "dynamic_5333434": {
+        "title": "experience_level",
+        "type": ["null", "string"]
+      }
+  }
+}
