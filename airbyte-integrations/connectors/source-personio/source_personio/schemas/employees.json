@@ -76,10 +76,6 @@
             "type": ["null", "string"]
           }
         }
-      },
-      "dynamic_5333434": {
-        "title": "experience_level",
-        "type": ["null", "string"]
       }
   }
 }
