@@ -61,4 +61,4 @@ class PersonioOAuth(TokenAuthenticator):
 
 class PersonioAuth:
     def __new__(cls, config: dict) -> PersonioOAuth:
-        return PersonioOAuth(config, "https://api.personio.de/v1/auth/")
+        return PersonioOAuth(config, "https://api.personio.de/v1/auth")
