@@ -1,81 +1,480 @@
 {
-  "type": "object",
+  "$schema": "http://json-schema.org/schema#",
   "properties": {
-      "id": {
-        "type": ["null", "integer"]
-      },
-      "first_name": {
-        "type": ["null", "string"]
-      },
-      "last_name": {
-        "type": ["null", "string"]
-      },
-      "email": {
-        "type": ["null", "string"]
-      },
-      "status": {
-        "type": ["null", "string"]
-      },
-      "position": {
-        "type": ["null", "string"]
-      },
-      "supervisor": {
-        "type": "object",
+    "absence_entitlement": {
+      "items": {
         "properties": {
-          "id": {
-            "type": ["null", "integer"]
+          "attributes": {
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "entitlement": {
+                "type": "number"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           },
-          "first_name": {
-            "type": ["null", "string"]
-          },
-          "last_name": {
-            "type": ["null", "string"]
-          },
-          "email": {
-            "type": ["null", "string"]
+          "type": {
+            "type": "string"
           }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "contract_end_date": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "cost_centers": {
+      "type": "array"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "department": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
         }
       },
-      "created_at": {
-        "type": ["null", "string"],
-        "format": "date-time"
-      },
-      "last_modified_at": {
-        "type": ["null", "string"],
-        "format": "date-time"
-      },
-      "office": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": ["null", "integer"]
-          },
-          "name": {
-            "type": ["null", "string"]
-          }
+      "type": "object"
+    },
+    "dynamic_1152124": {
+      "type": "string"
+    },
+    "dynamic_1833594": {
+      "type": "string"
+    },
+    "dynamic_1911703": {
+      "type": "string"
+    },
+    "dynamic_3319077": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_5333434": {
+      "type": "string"
+    },
+    "dynamic_5535083": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_6752624": {
+      "type": "string"
+    },
+    "dynamic_6752625": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_6752626": {
+      "type": "string"
+    },
+    "dynamic_6752627": {
+      "type": "string"
+    },
+    "dynamic_6752628": {
+      "type": "string"
+    },
+    "dynamic_6752629": {
+      "type": "string"
+    },
+    "dynamic_6752630": {
+      "type": "string"
+    },
+    "dynamic_6752631": {
+      "type": "string"
+    },
+    "dynamic_6752632": {
+      "type": "string"
+    },
+    "dynamic_6752633": {
+      "type": "string"
+    },
+    "dynamic_6752634": {
+      "type": "string"
+    },
+    "dynamic_6752635": {
+      "type": "string"
+    },
+    "dynamic_6752636": {
+      "type": "string"
+    },
+    "dynamic_6752637": {
+      "type": "null"
+    },
+    "dynamic_6752638": {
+      "type": "string"
+    },
+    "dynamic_6752639": {
+      "type": "string"
+    },
+    "dynamic_6752640": {
+      "type": "string"
+    },
+    "dynamic_6752641": {
+      "type": "string"
+    },
+    "dynamic_6752642": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_6752643": {
+      "type": "string"
+    },
+    "dynamic_6752644": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_6752645": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_6752646": {
+      "type": "string"
+    },
+    "dynamic_6752647": {
+      "type": "string"
+    },
+    "dynamic_6752648": {
+      "type": "string"
+    },
+    "dynamic_6752649": {
+      "type": "string"
+    },
+    "dynamic_6752650": {
+      "type": "string"
+    },
+    "dynamic_6752651": {
+      "type": "string"
+    },
+    "dynamic_6752652": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_6752653": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_7385196": {
+      "type": "string"
+    },
+    "dynamic_7385203": {
+      "type": "string"
+    },
+    "dynamic_7390281": {
+      "type": "string"
+    },
+    "dynamic_7393517": {
+      "type": "string"
+    },
+    "dynamic_7393518": {
+      "type": "string"
+    },
+    "dynamic_7393519": {
+      "type": "string"
+    },
+    "dynamic_7393520": {
+      "type": "string"
+    },
+    "dynamic_7393521": {
+      "type": "string"
+    },
+    "dynamic_7393522": {
+      "type": "string"
+    },
+    "dynamic_7393676": {
+      "type": "string"
+    },
+    "dynamic_7561576": {
+      "type": "string"
+    },
+    "dynamic_7561578": {
+      "type": "string"
+    },
+    "dynamic_932154": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_932157": {
+      "type": "string"
+    },
+    "dynamic_932158": {
+      "type": "string"
+    },
+    "dynamic_932159": {
+      "type": "string"
+    },
+    "dynamic_932160": {
+      "type": "string"
+    },
+    "dynamic_932161": {
+      "type": "string"
+    },
+    "dynamic_932162": {
+      "type": "string"
+    },
+    "dynamic_932163": {
+      "type": "string"
+    },
+    "dynamic_932164": {
+      "type": "string"
+    },
+    "dynamic_932165": {
+      "type": "string"
+    },
+    "dynamic_932166": {
+      "type": "string"
+    },
+    "dynamic_932167": {
+      "type": "string"
+    },
+    "dynamic_932169": {
+      "type": "string"
+    },
+    "dynamic_932171": {
+      "type": "string"
+    },
+    "dynamic_932172": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dynamic_932173": {
+      "type": "string"
+    },
+    "dynamic_932174": {
+      "type": "string"
+    },
+    "dynamic_932175": {
+      "type": "string"
+    },
+    "dynamic_932176": {
+      "type": "string"
+    },
+    "dynamic_932181": {
+      "type": "string"
+    },
+    "dynamic_932182": {
+      "type": "string"
+    },
+    "dynamic_968132": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "employment_type": {
+      "type": "string"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "fix_salary_interval": {
+      "type": "string"
+    },
+    "gender": {
+      "type": "string"
+    },
+    "hire_date": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "holiday_calendar": {
+      "properties": {
+        "country": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "type": [
+            "null",
+            "string"
+          ]
         }
       },
-      "department": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": ["null", "integer"]
-          },
-          "name": {
-            "type": ["null", "string"]
-          }
+      "type": "object"
+    },
+    "id": {
+      "type": "integer"
+    },
+    "last_modified_at": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "last_working_day": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "office": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
         }
       },
-      "team": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": ["null", "integer"]
-          },
-          "name": {
-            "type": ["null", "string"]
-          }
+      "type": "object"
+    },
+    "position": {
+      "type": "string"
+    },
+    "probation_period_end": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "profile_picture": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "status": {
+      "type": "string"
+    },
+    "subcompany": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
         }
-      }
-  }
+      },
+      "type": ["object", "null"]
+    },
+    "supervisor": {
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "last_name": {
+          "type": "string"
+        }
+      },
+      "type": ["object", "null"]
+    },
+    "team": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "termination_date": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "termination_reason": {
+      "type": "string"
+    },
+    "termination_type": {
+      "type": "string"
+    },
+    "vacation_day_balance": {
+      "type": "number"
+    },
+    "weekly_working_hours": {
+      "type": "string"
+    },
+    "work_schedule": {
+      "properties": {
+        "friday": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "monday": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "saturday": {
+          "type": "string"
+        },
+        "sunday": {
+          "type": "string"
+        },
+        "thursday": {
+          "type": "string"
+        },
+        "tuesday": {
+          "type": "string"
+        },
+        "valid_from": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "wednesday": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "type": "object"
 }

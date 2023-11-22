@@ -2,6 +2,35 @@
     "streams": [
         {
             "stream": {
+                "name": "attributes",
+                "json_schema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "type": "object",
+                    "properties": {
+                        "key": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "universal_id": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        }
+                    }
+                },
+                "supported_sync_modes": ["full_refresh"]
+            },
+            "sync_mode": "full_refresh",
+            "destination_sync_mode": "overwrite"
+        },
+        {
+            "stream": {
                 "name": "employees",
                 "json_schema": {
                     "$schema": "http://json-schema.org/draft-07/schema#",
