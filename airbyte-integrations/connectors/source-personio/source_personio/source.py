@@ -69,17 +69,15 @@ class PersonioStream(HttpStream, ABC):
             attributes = data.get("attributes", {})
             response = {}
             for attribute, value in attributes.items():
-                # Only retrieves values which are defined in the schema
-                if attribute in self.get_json_schema().get("properties"):
-                    response[attribute] = value.get("value")
-                    if (
-                        isinstance(response[attribute], dict)
-                    ):
-                        sub_attributes = response[attribute].get("attributes", {})
-                        for sub_attribute, sub_value in sub_attributes.items():
-                            if isinstance(sub_value, dict):
-                                sub_attributes[sub_attribute] = sub_value.get("value")
-                        response[attribute] = sub_attributes
+                response[attribute] = value.get("value")
+                if (
+                    isinstance(response[attribute], dict)
+                ):
+                    sub_attributes = response[attribute].get("attributes", {})
+                    for sub_attribute, sub_value in sub_attributes.items():
+                        if isinstance(sub_value, dict):
+                            sub_attributes[sub_attribute] = sub_value.get("value")
+                    response[attribute] = sub_attributes
             yield response
 
 
@@ -91,7 +89,29 @@ class Employees(PersonioStream):
         return "company/employees"
 
 
-# Source
+class Attributes(PersonioStream):
+    cursor_field = "last_modified_at"
+    primary_key = "key"
+
+    def path(self, **kwargs) -> str:
+        return "company/employees/attributes"
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        """
+        Example attributes response:
+        {
+            'key': 'first_name',
+            'label': 'First name',
+            'type': 'standard',
+            'universal_id': 'first_name'
+        }
+        :return an iterable containing each record in the response
+        """
+        response_data = response.json().get("data")
+        for data in response_data:
+            yield data
+
+
 class SourcePersonio(AbstractSource):
     def check_connection(self, logger, config) -> Tuple[bool, any]:
         """
@@ -114,4 +134,4 @@ class SourcePersonio(AbstractSource):
         :param config: A Mapping of the user input configuration as defined in the connector spec.
         """
         auth = PersonioAuth(config)
-        return [Employees(authenticator=auth)]
+        return [Attributes(authenticator=auth), Employees(authenticator=auth)]
