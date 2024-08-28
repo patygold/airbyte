@@ -1,0 +1,53 @@
+
+{
+    "$schema": "http://json-schema.org/schema#",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "employee": {
+        "type": "integer"
+      },
+      "date": {
+        "type": "string",
+        "format": "date"
+      },
+      "start_time": {
+        "type": "string"
+      },
+      "end_time": {
+        "type": "string"
+      },
+      "break": {
+        "type": "integer"
+      },
+      "comment": {
+        "type": "string"
+      },
+      "updated_at": {
+        "type": "string",
+        "airbyte_type": "timestamp_with_timezone",
+        "format": "date-time"
+      },
+      "status": {
+        "type": "string"
+      },
+      "project": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "is_holiday": {
+        "type": "boolean"
+      },
+      "is_on_time_off": {
+        "type": "boolean"
+      }
+    },
+    "type": "object"
+}
+  
