@@ -18,7 +18,6 @@ from source_personio.auth import PersonioAuth
 class PersonioStream(HttpStream, ABC):
     url_base = "https://api.personio.de/v1/"
     limit = 200
-    data_field = None
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
         """
