@@ -30,14 +30,6 @@ used for editable installs (`pip install -e`) to pull in Python dependencies fro
 If this is mumbo jumbo to you, don't worry about it, just put your deps in `setup.py` but install using `pip install -r requirements.txt` and everything
 should work as you expect.
 
-#### Building via Gradle
-You can also build the connector in Gradle. This is typically used in CI and not needed for your development workflow.
-
-To build using Gradle, from the Airbyte repository root, run:
-```
-./gradlew :airbyte-integrations:connectors:source-personio:build
-```
-
 #### Create credentials
 **If you are a community contributor**, follow the instructions in the [documentation](https://docs.airbyte.com/integrations/sources/personio)
 to generate the necessary credentials. Then create a file `secrets/config.json` conforming to the `source_personio/spec.yaml` file.
@@ -62,13 +54,6 @@ First, make sure you build the latest Docker image:
 ```
 docker build . -t airbyte/source-personio:dev
 ```
-
-You can also build the connector image via Gradle:
-```
-./gradlew :airbyte-integrations:connectors:source-personio:airbyteDocker
-```
-When building via Gradle, the docker image name and tag, respectively, are the values of the `io.airbyte.name` and `io.airbyte.version` `LABEL`s in
-the Dockerfile.
 
 #### Run
 Then run any of the connector commands as follows:
@@ -105,17 +90,6 @@ To run your integration tests with acceptance tests, from the connector root, ru
 python -m pytest integration_tests -p integration_tests.acceptance
 ```
 To run your integration tests with docker
-
-### Using gradle to run tests
-All commands should be run from airbyte project root.
-To run unit tests:
-```
-./gradlew :airbyte-integrations:connectors:source-personio:unitTest
-```
-To run acceptance and custom integration tests:
-```
-./gradlew :airbyte-integrations:connectors:source-personio:integrationTest
-```
 
 ## Dependency Management
 All of your dependencies should go in `setup.py`, NOT `requirements.txt`. The requirements file is only used to connect internal Airbyte dependencies in the monorepo for local development.

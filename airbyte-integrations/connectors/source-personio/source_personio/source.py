@@ -5,6 +5,7 @@
 
 from abc import ABC
 from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Tuple
+from datetime import datetime
 
 import requests
 from airbyte_cdk.sources import AbstractSource
@@ -16,6 +17,7 @@ from source_personio.auth import PersonioAuth
 # Full refresh stream
 class PersonioStream(HttpStream, ABC):
     url_base = "https://api.personio.de/v1/"
+    limit = 200
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
         """
@@ -112,6 +114,62 @@ class Attributes(PersonioStream):
             yield data
 
 
+class Attendances(PersonioStream):
+    cursor_field = "updated_at"
+    primary_key = "id"
+    offset = 0
+
+    def path(self, **kwargs) -> str:
+        return "company/attendances"
+    
+    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
+        stream_data = response.json().get("data")
+        if len(stream_data) < self.limit:
+            return
+        self.offset += self.limit
+        return {"offset": self.offset}
+
+    def request_params(
+        self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> MutableMapping[str, Any]:
+        params = super().request_params(
+            stream_state=stream_state,
+            stream_slice=stream_slice,
+            next_page_token=next_page_token,
+        )
+        params["start_date"] = "2019-01-01"
+        params["end_date"] = datetime.today().strftime('%Y-%m-%d')
+        params["limit"] = self.limit
+        if next_page_token:
+            params.update(**next_page_token)
+        return params
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        """
+        Example attributes response:
+        {
+            'id': 1111111,
+            'type': 'AttendancePeriod',
+            'attributes': {
+                'employee': 22222,
+                'date': '2022-07-14',
+                'start_time': '12:30',
+                'end_time': '17:00'
+            }
+        }
+        :return an iterable containing each record in the response
+        """
+        response_data = response.json().get("data")
+        for data in response_data:
+            response = {}
+            response["id"] = data.get("id")
+            response["type"] = data.get("type")
+            attributes = data.get("attributes", {})
+            for attribute, value in attributes.items():
+                response[attribute] = value
+            yield response
+
+
 class SourcePersonio(AbstractSource):
     def check_connection(self, logger, config) -> Tuple[bool, any]:
         """
@@ -134,4 +192,8 @@ class SourcePersonio(AbstractSource):
         :param config: A Mapping of the user input configuration as defined in the connector spec.
         """
         auth = PersonioAuth(config)
-        return [Attributes(authenticator=auth), Employees(authenticator=auth)]
+        return [
+            Attributes(authenticator=auth),
+            Employees(authenticator=auth),
+            Attendances(authenticator=auth),
+        ]
