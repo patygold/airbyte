@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+ * Copyright (c) 2023 Airbyte, Inc., all rights reserved.
  */
 
 package io.airbyte.integrations.source.kafka.format;
@@ -9,7 +9,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import io.airbyte.commons.json.Jsons;
 import io.airbyte.commons.util.AutoCloseableIterator;
 import io.airbyte.commons.util.AutoCloseableIterators;
 import io.airbyte.integrations.source.kafka.KafkaStrategy;
@@ -205,7 +207,7 @@ public class AvroFormat extends AbstractFormat {
               .withRecord(new AirbyteRecordMessage()
                   .withStream(record.topic())
                   .withEmittedAt(Instant.now().toEpochMilli())
-                  .withData(output));
+                  .withData(Jsons.jsonNode(ImmutableMap.builder().put("value", output).build())));
         }
 
         return endOfData();

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+# Copyright (c) 2023 Airbyte, Inc., all rights reserved.
 #
 
 
@@ -43,7 +43,7 @@ class CatalogField:
             return pendulum.parse(value)
         return value
 
-    def parse(self, record: Mapping[str, Any], path: Optional[List[str]] = None) -> Any:
+    def parse(self, record: Mapping[str, Any], path: Optional[List[Union[int, str]]] = None) -> Any:
         """Extract field value from the record and cast it to native type"""
         path = path or self.path
         value = reduce(lambda data, key: data[key], path, record)
@@ -109,7 +109,7 @@ class JsonSchemaHelper:
         """
         return CatalogField(schema=self.get_property(path), path=path)
 
-    def get_node(self, path: List[str]) -> Any:
+    def get_node(self, path: List[Union[str, int]]) -> Any:
         """Return part of schema by specified path
 
         :param path: list of fields in the order of navigation
@@ -122,17 +122,24 @@ class JsonSchemaHelper:
             node = node[segment]
         return node
 
-    def get_parent(self, path: str) -> Any:
+    def get_parent_path(self, path: str, separator="/") -> Any:
+        """
+        Returns the parent path of the supplied path
+        """
+        absolute_path = f"{separator}{path}" if not path.startswith(separator) else path
+        parent_path, _ = absolute_path.rsplit(sep=separator, maxsplit=1)
+        return parent_path
+
+    def get_parent(self, path: str, separator="/") -> Any:
         """
         Returns the parent dict of a given path within the `obj` dict
         """
-        absolute_path = f"/{path}"
-        parent_path, _ = absolute_path.rsplit(sep="/", maxsplit=1)
+        parent_path = self.get_parent_path(path, separator=separator)
         if parent_path == "":
             return self._schema
-        return dpath.util.get(self._schema, parent_path)
+        return dpath.util.get(self._schema, parent_path, separator=separator)
 
-    def find_nodes(self, keys: List[str]) -> List[List[str]]:
+    def find_nodes(self, keys: List[str]) -> List[List[Union[str, int]]]:
         """Find all paths that lead to nodes with the specified keys.
 
         :param keys: list of keys
@@ -233,3 +240,26 @@ def get_expected_schema_structure(schema: dict, annotate_one_of: bool = False) -
 
     _scan_schema(schema)
     return paths
+
+
+def flatten_tuples(to_flatten):
+    """Flatten a tuple of tuples into a single tuple."""
+    types = set()
+
+    if not isinstance(to_flatten, tuple):
+        to_flatten = (to_flatten,)
+    for thing in to_flatten:
+        if isinstance(thing, tuple):
+            types.update(flatten_tuples(thing))
+        else:
+            types.add(thing)
+    return tuple(types)
+
+
+def get_paths_in_connector_config(schema: dict) -> List[str]:
+    """
+    Traverse through the provided schema's values and extract the path_in_connector_config paths
+    :param properties: jsonschema containing values which may have path_in_connector_config attributes
+    :returns list of path_in_connector_config paths
+    """
+    return ["/" + "/".join(value["path_in_connector_config"]) for value in schema.values()]

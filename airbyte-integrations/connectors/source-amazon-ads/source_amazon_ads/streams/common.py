@@ -1,20 +1,18 @@
 #
-# Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+# Copyright (c) 2023 Airbyte, Inc., all rights reserved.
 #
-
-from abc import ABC, abstractmethod
+import logging
+from abc import ABC
 from http import HTTPStatus
-from typing import Any, Iterable, List, Mapping, MutableMapping, Optional
+from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Union
 
 import requests
-from airbyte_cdk.sources.streams.availability_strategy import AvailabilityStrategy
+from airbyte_cdk.models import FailureType
 from airbyte_cdk.sources.streams.core import Stream
 from airbyte_cdk.sources.streams.http import HttpStream
-from airbyte_cdk.sources.utils.schema_helpers import expand_refs
-from pydantic import BaseModel, ValidationError
+from airbyte_cdk.sources.streams.http.error_handlers import ErrorHandler, ErrorResolution, HttpStatusErrorHandler, ResponseAction
+from pydantic.v1 import BaseModel, ValidationError
 from source_amazon_ads.constants import URL_MAPPING
-from source_amazon_ads.schemas import CatalogModel
-from source_amazon_ads.schemas.profile import Profile
 
 """
 This class hierarchy may seem overcomplicated so here is a visualization of
@@ -25,22 +23,9 @@ airbyte_cdk.sources.streams.core.Stream
     ├── airbyte_cdk.sources.streams.http.HttpStream
     │   └── AmazonAdsStream
     │       ├── Profiles
-    │       └── SubProfilesStream
-    │           ├── SponsoredDisplayAdGroups
-    │           ├── SponsoredDisplayCampaigns
-    │           ├── SponsoredDisplayProductAds
-    │           ├── SponsoredDisplayTargetings
-    │           ├── SponsoredProductAdGroups
-    │           ├── SponsoredProductAds
-    │           ├── SponsoredProductCampaigns
-    │           ├── SponsoredProductKeywords
-    │           ├── SponsoredProductNegativeKeywords
-    │           ├── SponsoredProductTargetings
-    │           ├── SponsoredBrandsCampaigns
-    │           ├── SponsoredBrandsAdGroups
-    │           └── SponsoredBrandsKeywords
+    │       ├── Portfolios
     └── ReportStream
-        ├── SponsoredBrandsReportStream
+        ├── SponsoredBrandsV3ReportStream
         ├── SponsoredDisplayReportStream
         └── SponsoredProductsReportStream
 
@@ -49,11 +34,11 @@ for storing list of profiles that later be used by all the streams to get
 profile id. Also it stores pydantic model and API url for requests.
 
 AmazonAdsStream is Http based class, it used for making request that could be
-accomlished by single http call (any but report streams).
+accomplished by single http call (any but report streams).
 
 SubProfilesStream is subclass for http streams to perform read_records from
 basic class for EACH profile from self._profiles list. Also provides support
-for Amazon Ads API pagintaion. This is base class for all the sync http streams
+for Amazon Ads API pagination. This is base class for all the sync http streams
 that used by source.
 
 ReportStream (It implemented on report_stream.py file) is subclass for async
@@ -62,11 +47,35 @@ reports for profiles from BasicAmazonAdsStream _profiles list.
 
 """
 
+LOGGER = logging.getLogger("airbyte")
+
 
 class ErrorResponse(BaseModel):
     code: str
     details: str
-    requestId: str
+    requestId: Optional[str]
+
+
+class AmazonAdsErrorHandler(HttpStatusErrorHandler):
+    def interpret_response(self, response_or_exception: Optional[Union[requests.Response, Exception]] = None) -> ErrorResolution:
+        if response_or_exception.status_code == HTTPStatus.OK:
+            return ErrorResolution(ResponseAction.SUCCESS)
+
+        try:
+            resp = ErrorResponse.parse_raw(response_or_exception.text)
+        except ValidationError:
+            return ErrorResolution(
+                response_action=ResponseAction.FAIL,
+                failure_type=FailureType.system_error,
+                error_message=f"Response status code: {response_or_exception.status_code}. Unexpected error. {response_or_exception.text=}",
+            )
+
+        LOGGER.warning(
+            f"Unexpected error {resp.code} when processing request {response_or_exception.request.url} for "
+            f"{response_or_exception.request.headers['Amazon-Advertising-API-Scope']} profile: {resp.details}"
+        )
+
+        return ErrorResolution(ResponseAction.SUCCESS)
 
 
 class BasicAmazonAdsStream(Stream, ABC):
@@ -74,26 +83,10 @@ class BasicAmazonAdsStream(Stream, ABC):
     Base class for all Amazon Ads streams.
     """
 
-    def __init__(self, config: Mapping[str, Any], profiles: List[Profile] = None):
+    def __init__(self, config: Mapping[str, Any], profiles: List[dict[str, Any]] = None):
         self._profiles = profiles or []
         self._client_id = config["client_id"]
         self._url = URL_MAPPING[config["region"]]
-
-    @property
-    @abstractmethod
-    def model(self) -> CatalogModel:
-        """
-        Pydantic model to represent json schema
-        """
-
-    def get_json_schema(self):
-        schema = self.model.schema()
-        expand_refs(schema)
-        return schema
-
-    @property
-    def availability_strategy(self) -> Optional["AvailabilityStrategy"]:
-        return None
 
 
 # Basic full refresh stream
@@ -104,7 +97,7 @@ class AmazonAdsStream(HttpStream, BasicAmazonAdsStream):
 
     data_field = ""
 
-    def __init__(self, config: Mapping[str, Any], *args, profiles: List[Profile] = None, **kwargs):
+    def __init__(self, config: Mapping[str, Any], *args, profiles: List[dict[str, Any]] = None, **kwargs):
         # Each AmazonAdsStream instance are dependant on list of profiles.
         BasicAmazonAdsStream.__init__(self, config, profiles=profiles)
         HttpStream.__init__(self, *args, **kwargs)
@@ -113,14 +106,10 @@ class AmazonAdsStream(HttpStream, BasicAmazonAdsStream):
     def url_base(self):
         return self._url
 
-    @property
-    def raise_on_http_errors(self):
-        return False
-
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
         return None
 
-    def request_headers(self, *args, **kvargs) -> MutableMapping[str, Any]:
+    def request_headers(self, *args, **kwargs) -> MutableMapping[str, Any]:
         return {"Amazon-Advertising-API-ClientId": self._client_id}
 
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
@@ -166,51 +155,5 @@ class AmazonAdsStream(HttpStream, BasicAmazonAdsStream):
             f"{response.request.headers['Amazon-Advertising-API-Scope']} profile: {resp.details}"
         )
 
-
-class SubProfilesStream(AmazonAdsStream):
-    """
-    Stream for getting resources with pagination support and getting resources based on list of profiles set by source.
-    """
-
-    page_size = 100
-
-    def __init__(self, *args, **kvargs):
-        self._current_offset = 0
-        super().__init__(*args, **kvargs)
-
-    def next_page_token(self, response: requests.Response) -> Optional[int]:
-        if not response:
-            return 0
-        responses = response.json()
-        if len(responses) < self.page_size:
-            # This is last page, reset current offset
-            self._current_offset = 0
-            return 0
-        else:
-            next_offset = self._current_offset + self.page_size
-            self._current_offset = next_offset
-            return next_offset
-
-    def request_params(
-        self,
-        stream_state: Mapping[str, Any],
-        stream_slice: Mapping[str, Any] = None,
-        next_page_token: int = None,
-    ) -> MutableMapping[str, Any]:
-        return {
-            "startIndex": next_page_token,
-            "count": self.page_size,
-        }
-
-    def read_records(self, *args, **kvargs) -> Iterable[Mapping[str, Any]]:
-        """
-        Iterate through self._profiles list and send read all records for each profile.
-        """
-        for profile in self._profiles:
-            self._current_profile_id = profile.profileId
-            yield from super().read_records(*args, **kvargs)
-
-    def request_headers(self, *args, **kvargs) -> MutableMapping[str, Any]:
-        headers = super().request_headers(*args, **kvargs)
-        headers["Amazon-Advertising-API-Scope"] = str(self._current_profile_id)
-        return headers
+    def get_error_handler(self) -> ErrorHandler:
+        return AmazonAdsErrorHandler(logger=LOGGER)

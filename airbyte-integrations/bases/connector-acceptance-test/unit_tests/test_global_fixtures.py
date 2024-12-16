@@ -1,14 +1,20 @@
 #
-# Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+# Copyright (c) 2023 Airbyte, Inc., all rights reserved.
 #
 
 import json
 import time
 
 import pytest
-from airbyte_cdk.models import AirbyteStream, ConfiguredAirbyteCatalog, ConfiguredAirbyteStream, DestinationSyncMode, SyncMode
+from airbyte_protocol.models import AirbyteStream, ConfiguredAirbyteCatalog, ConfiguredAirbyteStream, DestinationSyncMode, SyncMode
 from connector_acceptance_test import conftest
-from connector_acceptance_test.config import BasicReadTestConfig, Config, EmptyStreamConfiguration, ExpectedRecordsConfig
+from connector_acceptance_test.config import (
+    BasicReadTestConfig,
+    Config,
+    EmptyStreamConfiguration,
+    ExpectedRecordsConfig,
+    IgnoredFieldsConfiguration,
+)
 
 
 @pytest.mark.parametrize(

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+# Copyright (c) 2023 Airbyte, Inc., all rights reserved.
 #
 
 from datetime import datetime
@@ -34,6 +34,7 @@ def config() -> Dict[str, str]:
         "host": "localhost",
         "port": 8081,
         "table": "default",
+        "ssl": False,
     }
     return args
 

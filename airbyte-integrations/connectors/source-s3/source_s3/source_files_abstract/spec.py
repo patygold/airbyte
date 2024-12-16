@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+# Copyright (c) 2023 Airbyte, Inc., all rights reserved.
 #
 
 
@@ -8,7 +8,7 @@ import re
 from typing import Any, Dict, Union
 
 from jsonschema import RefResolver
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 from .formats.avro_spec import AvroFormat
 from .formats.csv_spec import CsvFormat

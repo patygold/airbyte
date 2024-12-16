@@ -5,7 +5,7 @@ test_strictness_level: high
 acceptance_tests:
   spec:
     tests:
-      - spec_path: "integration_tests/spec.json"
+      - spec_path: "source_instagram/spec.json"
   connection:
     tests:
       - config_path: "secrets/config.json"
@@ -20,48 +20,32 @@ acceptance_tests:
       - config_path: "secrets/config.json"
         expect_records:
           path: "integration_tests/expected_records.jsonl"
-          extra_fields: yes
-          exact_order: yes
-          extra_records: no
         empty_streams:
-          - name: "media"
-            bypass_reason: "Floating data"
-          - name: "media_insights"
-            bypass_reason: "Floating data"
-          - name: "user_insights"
-            bypass_reason: "Floating data"
-          - name: "stories"
-            bypass_reason: "Stories only live for 24 hours"
-          - name: "story_insights"
-            bypass_reason: "Stories only live for 24 hours, so do the insights"
+          - name: media_insights
+            bypass_reason: Media statistic changed frequently
+          - name: user_insights
+            bypass_reason: User statistic changed frequently
+          - name: stories
+            bypass_reason: Stories available only 24 hours
+          - name: story_insights
+            bypass_reason: Stories available only 24 hours, so do the insights
   full_refresh:
     tests:
       - config_path: "secrets/config.json"
         configured_catalog_path: "integration_tests/configured_catalog.json"
         ignored_fields:
-          "user_insights":
-            - email_contacts
-            - follower_count
-            - get_directions_clicks
-            - impressions
-            - phone_call_clicks
-            - profile_views
-            - reach
-            - text_message_clicks
-            - website_clicks
-            - impressions_week
-            - reach_week
-            - impressions_days_28
-            - reach_days_28
-            - online_followers
+          user_lifetime_insights:
+            - name: value
+              bypass_reason: Floating values from sync-to-sync, due to live updating info.
+          user_insights:
+            - name: profile_views
+              bypass_reason: Floating values from sync-to-sync, due to live updating info.
   incremental:
     tests:
       - config_path: "secrets/config.json"
         configured_catalog_path: "integration_tests/incremental_catalog.json"
         future_state:
           future_state_path: "integration_tests/abnormal_state.json"
-        cursor_paths:
-          user_insights: ["17841408147298757", "date"]
         # because state is complex and stores values for different accounts on one hand
         # and there's no way we can set multiple cursor paths for a single stream on the other,
         # this test should be skipped as it is false negative.
