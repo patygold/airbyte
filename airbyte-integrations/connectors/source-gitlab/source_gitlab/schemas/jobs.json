@@ -136,6 +136,11 @@
           "type": ["null", "boolean"]
         }
       }
+    },
+    "updated_at": {
+      "description": "Date and time of last update",
+      "type": ["null", "string"],
+      "format": "date-time"
     }
   }
 }
