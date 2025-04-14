@@ -170,6 +170,70 @@ class Attendances(PersonioStream):
             yield response
 
 
+class Absences(PersonioStream):
+    cursor_field = "updated_at"
+    primary_key = "id"
+    offset = 0
+
+    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
+        stream_data = response.json().get("data")
+        if len(stream_data) < self.limit:
+            return
+        self.offset += self.limit
+        return {"offset": self.offset}
+
+    def request_params(
+        self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> MutableMapping[str, Any]:
+        params = super().request_params(
+            stream_state=stream_state,
+            stream_slice=stream_slice,
+            next_page_token=next_page_token,
+        )
+        params["start_date"] = "2019-01-01"
+        params["end_date"] = datetime.today().strftime('%Y-%m-%d')
+        params["limit"] = self.limit
+        params["X-Personio-App-ID"] = "AIRBYTE"
+        if next_page_token:
+            params.update(**next_page_token)
+        return params
+
+    def path(self, **kwargs) -> str:
+        return "company/time-offs"
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        """
+        Example attributes response:
+        {
+            "type": "TimeOffPeriod",
+            "attributes": {
+                "id": 1,
+                "time_off_type": {
+                    "type": "TimeOffType",
+                    "attributes": {
+                        "id": 1,
+                        "name": "Bezahlter Urlaub/Paid vacation",
+                    }
+                },
+                "employee": {
+                    "type": "Employee"
+                },
+                "created_at": "2020-08-28T14:38:55+02:00",
+                "updated_at": "2023-05-10T18:51:44+02:00"
+            }
+        }
+        :return an iterable containing each record in the response
+        """
+        response_data = response.json().get("data")
+        for data in response_data:
+            response = {}
+            response["type"] = data.get("type")
+            attributes = data.get("attributes", {})
+            for attribute, value in attributes.items():
+                response[attribute] = value
+            yield response
+
+
 class SourcePersonio(AbstractSource):
     def check_connection(self, logger, config) -> Tuple[bool, any]:
         """
@@ -196,4 +260,5 @@ class SourcePersonio(AbstractSource):
             Attributes(authenticator=auth),
             Employees(authenticator=auth),
             Attendances(authenticator=auth),
+            Absences(authenticator=auth),
         ]

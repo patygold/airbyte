@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "id": {
+      "type": "integer"
+    },
+    "id_v2": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "airbyte_type": "timestamp_with_timezone",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "airbyte_type": "timestamp_with_timezone",
+      "format": "date-time"
+    },
+    "days_count": {
+      "type": "number"
+    },
+    "half_day_start": {
+      "type": "integer"
+    },
+    "half_day_end": {
+      "type": "integer"
+    },
+    "time_off_type": {
+      "type": "object"
+    },
+    "employee": {
+      "type": "object"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "certificate": {
+      "type": "object"
+    },
+    "created_at": {
+      "type": "string",
+      "airbyte_type": "timestamp_with_timezone",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "airbyte_type": "timestamp_with_timezone",
+      "format": "date-time"
+    }
+  },
+  "type": "object"
+}
