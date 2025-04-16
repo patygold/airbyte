@@ -20,6 +20,7 @@ class PersonioOAuth(TokenAuthenticator):
         self._token_refresh_endpoint = token_refresh_endpoint
         self._client_secret = self.get_client_secret()
         self._client_id = self.get_client_id()
+        self._token = None
         super().__init__(
             ""
         )
@@ -52,11 +53,14 @@ class PersonioOAuth(TokenAuthenticator):
             headers=self.build_refresh_request_headers(),
         )
         response.raise_for_status()
-        return response.json()["data"]["token"]
+        self._token = response.json()["data"]["token"]
+        return self._token
 
     @property
     def token(self) -> str:
-        return f"{self._auth_method} {self.get_refresh_token()}"
+        if not self._token:
+            return f"{self._auth_method} {self.get_refresh_token()}"
+        return f"{self._auth_method} {self._token}"
 
 
 class PersonioAuth:

@@ -78,7 +78,7 @@
           "updated_at"
         ],
         "json_schema": {},
-        "name": "absences",
+        "name": "absence_balance_employees",
         "namespace": null,
         "source_defined_cursor": true,
         "source_defined_primary_key": [

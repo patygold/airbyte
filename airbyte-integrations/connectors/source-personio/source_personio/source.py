@@ -4,7 +4,9 @@
 
 
 from abc import ABC
-from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Tuple
+from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Tuple, Union
+from urllib.parse import urlparse
+from airbyte_cdk.models import SyncMode
 from datetime import datetime
 
 import requests
@@ -15,7 +17,11 @@ from source_personio.auth import PersonioAuth
 
 
 # Full refresh stream
-class PersonioStream(HttpStream, ABC):
+
+class PersonioBaseStream(HttpStream, ABC):
+    """
+    Base class for Personio API streams.
+    """
     url_base = "https://api.personio.de/v1/"
     limit = 200
 
@@ -39,6 +45,8 @@ class PersonioStream(HttpStream, ABC):
             "X-Personio-App-ID": "AIRBYTE"
         }
 
+
+class PersonioStream(PersonioBaseStream):
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
         """
         Example attributes response:
@@ -83,12 +91,56 @@ class PersonioStream(HttpStream, ABC):
             yield response
 
 
+class PersonioSubStream(PersonioBaseStream):
+    def __init__(self, name: str, path: str, parent_stream: Stream, **kwargs: Any) -> None:
+        self._name = name
+        self._path = path
+        self._parent_stream = parent_stream
+        super().__init__(**kwargs)
+
+    def parse_response(self, response: requests.Response, stream_slice: Mapping[str, Any] = None, **kwargs) -> Iterable[Mapping]:
+        response_data = response.json().get("data")
+        parent_id = stream_slice.get("id") if stream_slice else None
+        for data in response_data:
+            data["parent_id"] = parent_id
+            yield data
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def path(
+        self,
+        *,
+        stream_state: Optional[Mapping[str, Any]] = None,
+        stream_slice: Optional[Mapping[str, Any]] = None,
+        next_page_token: Optional[Mapping[str, Any]] = None,
+    ) -> str:
+        try:
+            return self._path.format(stream_slice=stream_slice)
+        except Exception as e:
+            raise e
+
+    def stream_slices(self, stream_state: Mapping[str, Any] = None, **kwargs) -> Iterable[Optional[Mapping[str, any]]]:
+        for _slice in self._parent_stream.stream_slices(sync_mode=SyncMode.full_refresh):
+            for parent_record in self._parent_stream.read_records(sync_mode=SyncMode.full_refresh, stream_slice=_slice):
+                yield parent_record
+
+
 class Employees(PersonioStream):
     cursor_field = "last_modified_at"
     primary_key = "id"
 
     def path(self, **kwargs) -> str:
         return "company/employees"
+
+    @property
+    def use_cache(self) -> bool:
+        return True
+
+
+class AbsenceBalanceEmployees(PersonioSubStream):
+    primary_key = "id"
 
 
 class Attributes(PersonioStream):
@@ -256,9 +308,16 @@ class SourcePersonio(AbstractSource):
         :param config: A Mapping of the user input configuration as defined in the connector spec.
         """
         auth = PersonioAuth(config)
+        employees = Employees(authenticator=auth)
         return [
             Attributes(authenticator=auth),
-            Employees(authenticator=auth),
+            employees,
             Attendances(authenticator=auth),
             Absences(authenticator=auth),
+            AbsenceBalanceEmployees(
+                name="absence_balance_employees",
+                authenticator=auth,
+                parent_stream=employees,
+                path="company/employees/{stream_slice[id]}/absences/balance"
+            ),
         ]
