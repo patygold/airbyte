@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "balance": {
+      "type": "number"
+    },
+    "available_balance": {
+      "type": "number"
+    },
+    "parent_id": {
+      "type": "integer"
+    }
+  },
+  "type": "object"
+}
