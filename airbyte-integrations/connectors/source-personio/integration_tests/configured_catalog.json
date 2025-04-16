@@ -78,6 +78,29 @@
           "updated_at"
         ],
         "json_schema": {},
+        "name": "absences",
+        "namespace": null,
+        "source_defined_cursor": true,
+        "source_defined_primary_key": [
+          [
+            "id"
+          ]
+        ],
+        "supported_sync_modes": [
+          "full_refresh"
+        ]
+      },
+      "sync_mode": "full_refresh"
+    },
+    {
+      "cursor_field": null,
+      "destination_sync_mode": "overwrite",
+      "primary_key": null,
+      "stream": {
+        "default_cursor_field": [
+          "updated_at"
+        ],
+        "json_schema": {},
         "name": "absence_balance_employees",
         "namespace": null,
         "source_defined_cursor": true,
