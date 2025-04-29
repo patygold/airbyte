@@ -170,7 +170,7 @@ definitions:
     $ref: "#/definitions/base_projects_child_stream"
     incremental_sync:
       type: DatetimeBasedCursor
-      cursor_field: "{{ parameters.get('cursor_field', 'updated_at') }}"
+      cursor_field: "{{ parameters.get('cursor_field', 'updated_at') + duration('PT1S') }}"
       start_datetime: "{{ config.get('start_date', '2014-01-01T00:00:00Z') }}"
       datetime_format: "%Y-%m-%dT%H:%M:%SZ"
       cursor_datetime_formats:
@@ -471,8 +471,23 @@ definitions:
 
   jobs_stream:
     name: "jobs"
-    $ref: "#/definitions/base_projects_child_stream"
-    retriever: "#/definitions/pipelines_child_streams_retriever"
+    $ref: "#/definitions/base_projects_incremental_child_stream"
+    retriever:
+      type: SimpleRetriever
+      record_selector: "#/definitions/selector"
+      paginator: "#/definitions/paginator"
+      requester:
+        $ref: '#/definitions/requester'
+        path: 'projects/{{ stream_slice.parent_slice.id }}/pipelines/{{ stream_slice.pipeline_id }}/jobs'
+      partition_router:
+        type: SubstreamPartitionRouter
+        parent_stream_configs:
+          - type: ParentStreamConfig
+            stream: "#/definitions/pipelines_stream"
+            parent_key: id
+            partition_field: pipeline_id
+            parent_stream_name: pipelines
+            incremental_dependency: true
     transformations:
       - type: AddFields
         fields:
@@ -491,6 +506,10 @@ definitions:
           - type: AddedFieldDefinition
             path: ["commit_id"]
             value: "{{ (record.get('commit') or {}).get('id') }}"
+          - type: AddedFieldDefinition
+            path:
+              - updated_at
+            value: "{{ (record.get('pipeline') or {}).get('updated_at') }}"
     $parameters:
       path: "projects/{{ stream_slice.parent_slice.id }}/pipelines/{{ stream_slice.id }}/jobs"
 
